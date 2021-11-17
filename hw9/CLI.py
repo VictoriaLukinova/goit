@@ -1,9 +1,6 @@
-import collections
-
 CONTACTS_DICT = {
     'Anna' : '0931111111'
 }
-Command_list = collections.namedtuple('Command_list',['command', 'name', 'phone',])
 
 def input_error(func):
     def inner(command_list):
@@ -22,23 +19,23 @@ def hello(*arg) -> str:
     return 'How can I help you?'
 
 @input_error
-def add(command_list: Command_list) -> str:
+def add(name: str, phone: str) -> str:
     global CONTACTS_DICT
-    if command_list.name not in CONTACTS_DICT:
-        CONTACTS_DICT.update({command_list.name: command_list.phone})
+    if name not in CONTACTS_DICT:
+        CONTACTS_DICT.update({name: phone})
         return 'New contact has been added'
     else:
-        return f"Contact {command_list.name} in list!"
+        return f"Contact {name} in list!"
 
 @input_error
-def change(command_list: Command_list) -> str: 
+def change(name: str, phone: str) -> str: 
     global CONTACTS_DICT
-    CONTACTS_DICT[command_list.name] = command_list.phone
-    return f'Contact {command_list.name} has been changed'
+    CONTACTS_DICT[name] = phone
+    return f'Contact {name} has been changed'
 
 @input_error
-def phone(command_list: Command_list) -> str :
-    return CONTACTS_DICT[command_list.name]
+def phone(name: str, phone: str) -> str :
+    return CONTACTS_DICT[name]
 
 def show_all(*arg) -> str:
     global CONTACTS_DICT
@@ -48,9 +45,6 @@ def show_all(*arg) -> str:
 
 def exit(*arg) -> str:
     return "Good bye!"
-
-def command_error(*arg) -> str:
-    return "Command is not found. Please, try again"
 
 COMMAND_DICT ={
     'hello': hello,
@@ -63,40 +57,39 @@ COMMAND_DICT ={
     'good bye': exit
 }
 
-def get_handler(command: str):
+def get_command_set(string:str) -> set: #Обработка команды
+    command_list = string.split() 
+    if len(command_list) == 0:
+        return('', '', '')   
+    if command_list[0].lower() == 'show' and command_list[1].lower() == 'all':
+        delete = command_list.pop(1)
+        command_list[0] = command_list[0] + ' ' + delete
+    if command_list[0].lower() == 'good' and command_list[1].lower() == 'bye':
+        delete = command_list.pop(1)
+        command_list[0] = command_list[0] + ' ' + delete
+    command = command_list[0].lower()
     try:
-        return COMMAND_DICT[command]
-    except KeyError:
-        return command_error
-
-def change_command(command:str) -> Command_list: #Обработка команды
-    commands = command.split()
-    if len(commands) == 0:
-        command_list = Command_list('', '', '')
-        return command_list    
-    if commands[0].lower() == 'show' and commands[1].lower() == 'all':
-        delete = commands.pop(1)
-        commands[0] = commands[0] + ' ' + delete
-    if commands[0].lower() == 'good' and commands[1].lower() == 'bye':
-        delete = commands.pop(1)
-        commands[0] = commands[0] + ' ' + delete
-    commands[0] = commands[0].lower()
-    if len(commands) == 1:
-        command_list = Command_list(commands[0], '', '')
-    elif len(commands) == 2:
-        command_list = Command_list(commands[0], commands[1], '')
-    elif len(commands) >= 3:
-        command_list = Command_list(commands[0], commands[1], commands[2])
-    return command_list
+        name = command_list[1]
+    except IndexError:
+        name = ''
+    try:
+        phone = command_list[2]
+    except IndexError:
+        phone = ''
+    return (command, name, phone)
 
 def main():
-    while True:
-        command = input()
-        command_list = change_command(command)
-        func = get_handler(command_list.command)
-        print(func(command_list))
-        if command_list.command in ('exit', 'close', 'good bye'):
-            return
+    command = ''
+    while command not in ('exit', 'close', 'good bye'):
+        string = input()
+        command, name, phone = get_command_set(string)
+        try:
+            func = COMMAND_DICT[command]
+        except KeyError:
+            func = None
+            print("Command is not found. Please, try again")
+        if func:
+            print(func(name, phone))
 
 if __name__ == '__main__':
     main()
