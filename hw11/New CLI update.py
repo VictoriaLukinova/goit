@@ -1,4 +1,5 @@
 from collections import UserDict
+from dateutil.parser import parse
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -18,17 +19,21 @@ class Field:
         self.__value = value
 
     @value.getter
-    def value(self):
-        return f'Value is {self.__value}'
+    def value(self) -> str:
+        return str(self.__value)
 
 class Name(Field):
     @property
     def value(self):
         return self.__value
-        
+    
+    @value.setter
+    def value(self, value: str) -> None:
+        self.__value = value
+
     @value.getter
-    def value(self):
-        return f'Name is {self.__value}'
+    def value(self) -> str:
+        return str(self.__value)
 
 class Phone(Field):
     @property
@@ -37,77 +42,84 @@ class Phone(Field):
 
     @value.setter
     def value(self, value: str) -> None:
-        if (type(value) != str or len(value) != 12):
-            print('Input valid phone in format 380123456789') 
-        if value.isdigit():
+        if type(value) != str:
+           raise TypeError('Input string')
+        elif (value[0] != '+' or len(value) != 13):
+            print('Input valid phone in format +380123456789') 
+        elif value[1:].isdigit():
             self.__value = value
 
     @value.getter
-    def value(self) -> None:
-        return f'Phone is {self.__value}'
+    def value(self) -> str:
+        return f'phone is {self.__value}'
 
 class Birthday(Field):
     @property
-    def value(self) -> None:
+    def value(self) -> datetime:
         return self.__value
 
     @value.setter
     def value(self, value: str) -> None:
-        try:
-            self.__value = datetime.strptime(value, '%d.%m.%Y')
-        except ValueError:
-            print('Input valid date in format dd.mm.YYYY')
+        self.__value = parse(value)
 
     @value.getter
-    def value(self) -> None:
+    def value(self) -> str:
         return f'Birthday is {self.__value}'
 
 class Record:
-    def __init__(self, name: Name, phone: Phone, birthday: Optional[Birthday] = None) -> None:
-        self.name = name
-        self.phones = [phone]
+    def __init__(self, name: str, phone: Optional[str] = None, birthday: Optional[str] = None) -> None:
+        self.name = Name(name)
+        self.phones = [Phone(phone)]
         self.data = {self.name: self.phones}
-        self.birthday = birthday
+        self.birthday = Birthday(birthday)
 
-    def add_phone(self, phone: Phone) -> None:
+    def add_phone(self, phone: str) -> None:
         '''Method for add phone to list'''
-        self.phones.append(phone)
+        self.phones.append(Phone(phone))
 
-    def delete_phone(self, phone: Phone) -> None:
+    def delete_phone(self, phone: str) -> None:
         '''Method for delete phone from list'''
-        try:
-            self.phones.remove(phone)
-        except ValueError:
-            print('Phone not in list')
+        for user_phone in self.phones:
+            if user_phone.value == phone:
+                self.phones.remove(user_phone)
 
-    def change_phone(self, olden_phone: Phone, new_phone: Phone) -> None:
+    def change_phone(self, olden_phone: str, new_phone: str) -> None:
         '''Method for change phone in list'''
-        i = self.phones.index(olden_phone)
-        olden_phone = self.phones.pop(i)
-        self.phones.insert(i, new_phone)
+        i = 0
+        for user_phone in self.phones:
+            if user_phone.value == olden_phone:
+                self.phones.remove(user_phone)
+                self.phones.insert(i, Phone(new_phone))
+            i += 1
         
     def days_to_birthday(self) -> int:
-        if self.birthday:
+        if self.birthday.value:
             today = datetime.now()
-            birthday = self.birthday
-            if today.month > birthday.month or (today.month == birthday.month and today.day > birthday.day):
-                birthday_year = today.year + 1
-            else:
-                birthday_year = today.year
-            next_birthday = datetime(year= birthday_year, month= birthday.month, day= birthday.day, hour= 0)
+            birthday = self.birthday.value
+            date_1 = datetime(year= today.year, month= birthday.month, day= birthday.day)
+            date_2 = datetime(year= today.year+1, month= birthday.month, day= birthday.day)
+            next_birthday = date_1 if date_1 > today else date_2
             difference = next_birthday - today
             return difference.days
         return None
 
 class AddressBook(UserDict):
-    def add_record(self, record: Record) -> dict[str, list]:
+    def add_record(self, record: Record) -> dict[Name, list[Phone]]:
         self.data.update(record.data)
 
-    def get_iterator(self):
-        for key in self.data:
-            yield f'Name: {key}, phones: {self.data[key]}'
-
-    def iterator(self, n: int):
-        gen = self.get_iterator()
-        for _ in range(n):
-            print(next(gen))
+    def iterator(self, number: int):
+        items_list = list(self.data.items())
+        yield from (
+            items_list[index:index + number]
+            for index in range(0, len(items_list), number)
+        )
+    
+    def print_records(self, number: int):
+        gen = self.iterator(int(number))
+        records = next(gen)
+        for record in records:
+            name = record[0].value + ' '
+            phones = ''
+            for phone in record[1]:
+                phones += phone.value
+            print(name + phones)
