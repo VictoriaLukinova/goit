@@ -51,7 +51,7 @@ class Phone(Field):
 
     @value.getter
     def value(self) -> str:
-        return f'phone is {self.__value}'
+        return str(self.__value)
 
 class Birthday(Field):
     @property
@@ -93,7 +93,7 @@ class Record:
             i += 1
         
     def days_to_birthday(self) -> int:
-        if self.birthday.value:
+        if self.birthday:
             today = datetime.now()
             birthday = self.birthday.value
             date_1 = datetime(year= today.year, month= birthday.month, day= birthday.day)
@@ -114,12 +114,10 @@ class AddressBook(UserDict):
             for index in range(0, len(items_list), number)
         )
     
-        def print_records(self, number: int):
+    def print_records(self, number: int):
         for records in self.iterator(int(number)):
             for key, value in records:
                 name = key.value
-                phones_list = []
-                for phone in value:
-                    phones_list.append(phone.value)
+                phones_list = [phone.value for phone in value]
                 phones = ', '.join(phones_list)
                 print(f'{name} {phones}')
