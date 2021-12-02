@@ -65,7 +65,8 @@ class Birthday(Field):
 
     @value.getter
     def value(self) -> str:
-        return f'Birthday is {self.__value}'
+        if self.__value:
+            return self.__value
 
 class Record:
     def __init__(self, name: str, phone: Optional[str] = None, birthday: Optional[str] = None) -> None:
@@ -94,7 +95,7 @@ class Record:
             i += 1
         
     def days_to_birthday(self) -> int:
-        if self.birthday.value:
+        if self.birthday and self.birthday.value:
             today = datetime.now()
             birthday = self.birthday.value
             date_1 = datetime(year= today.year, month= birthday.month, day= birthday.day)
@@ -115,7 +116,7 @@ class AddressBook(UserDict):
             for index in range(0, len(items_list), number)
         )
     
-    def print_records(self, number: int) -> None:
+    def print_records(self, number: int):
         for records in self.iterator(int(number)):
             for key, value in records:
                 name = key.value
