@@ -42,7 +42,7 @@ class Phone(Field):
 
     @value.setter
     def value(self, value: str) -> None:
-        if type(value) != str:
+        if not isinstance(value, str):
            raise TypeError('Input string')
         elif (value[0] != '+' or len(value) != 13):
             print('Input valid phone in format +380123456789') 
@@ -69,9 +69,9 @@ class Birthday(Field):
 class Record:
     def __init__(self, name: str, phone: Optional[str] = None, birthday: Optional[str] = None) -> None:
         self.name = Name(name)
-        self.phones = [Phone(phone)]
+        self.phones = [Phone(phone)] if phone else []
         self.data = {self.name: self.phones}
-        self.birthday = Birthday(birthday)
+        self.birthday = Birthday(birthday) if birthday else None
 
     def add_phone(self, phone: str) -> None:
         '''Method for add phone to list'''
@@ -114,12 +114,12 @@ class AddressBook(UserDict):
             for index in range(0, len(items_list), number)
         )
     
-    def print_records(self, number: int):
-        gen = self.iterator(int(number))
-        records = next(gen)
-        for record in records:
-            name = record[0].value + ' '
-            phones = ''
-            for phone in record[1]:
-                phones += phone.value
-            print(name + phones)
+        def print_records(self, number: int):
+        for records in self.iterator(int(number)):
+            for key, value in records:
+                name = key.value
+                phones_list = []
+                for phone in value:
+                    phones_list.append(phone.value)
+                phones = ', '.join(phones_list)
+                print(f'{name} {phones}')
