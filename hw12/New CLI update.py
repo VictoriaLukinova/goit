@@ -139,22 +139,3 @@ class AddressBook(UserDict):
             phones = ', '.join([phone.value for phone in value])
             if string in key.value or string in phones:
                 print(f'{key.value} {phones}')
-                
-
-a = Record('A', '+380934545445', '12.12.21')
-b = Record('B', '+380934545446', '12.12.21')
-b.add_phone('+380501234567')
-c = Record('C', '+380934545445', '12.12.21')
-addressbook = AddressBook()
-addressbook.add_record(a)
-addressbook.add_record(b)
-addressbook.add_record(c)
-addressbook.save_data_to_file()
-new_add = AddressBook()
-new_add = new_add.read_from_file()
-new_add.print_records(2)
-new_add.find_in_data('+380934545446')
-# encode_add = pickle.dumps(addressbook)
-# print(encode_add)
-#addressbook.print_records(2)
-#addressbook.print_records(1)
