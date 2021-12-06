@@ -80,6 +80,7 @@ def sorter_and_rename_file(path: Path) -> None:
         unknown_files.append(new_filename + filetype)
         if filetype:
             unknown_types.add(filetype)
+            new_file_folder = ''
     
     if new_file_folder == 'images' or new_file_folder == 'video' or new_file_folder == 'documents' or new_file_folder == 'audio':
         shutil.move(f'{path.parent}/{new_filepath}', f'{HOME_FOLDER}/{new_file_folder}/{new_filepath}') 
@@ -88,32 +89,7 @@ def sorter_and_rename_file(path: Path) -> None:
         os.remove(f'{path.parent}/{new_filepath}')
 
 def main():
-    try:
-        path = Path(sys.argv[1])
-    except:
-        print("Please enter one argument - a path of the folder")
-    global HOME_FOLDER
-    HOME_FOLDER = path
-
-    if path.is_dir():
-        for folder in FOLDERS:
-            if not os.path.exists(f'{HOME_FOLDER}/{folder}'):
-                os.makedirs(f'{HOME_FOLDER}/{folder}')
-        
-        sorter_and_rename_folder(path)
-
-        print(f'Images: {images_files}'
-              f'Video: {video_files}'
-              f'Audio: {audio_files}'
-              f'Documents: {documents_files}'
-              f'Archives: {archives_files}\n'
-              f'Known extensions: {known_types}'
-              f'Unknown extensions: {unknown_types}')
-
-    else:
-        print("It isn't a folder")
-
-if __name__ == '__main__':
+    global HOME_FOLDER, images_files, video_files, documents_files, audio_files, archives_files, unknown_files, known_types, unknown_types
     images_files = []
     video_files = []
     documents_files = []
@@ -123,4 +99,30 @@ if __name__ == '__main__':
 
     known_types = set()
     unknown_types = set()
+
+    try:
+        path = Path(sys.argv[1])
+    except:
+        print("Please enter one argument - a path of the folder")
+    HOME_FOLDER = path
+
+    if path.is_dir():
+        for folder in FOLDERS:
+            if not os.path.exists(f'{HOME_FOLDER}/{folder}'):
+                os.makedirs(f'{HOME_FOLDER}/{folder}')
+        
+        sorter_and_rename_folder(path)
+
+        print(f'Images: {images_files}\n'
+              f'Video: {video_files}\n'
+              f'Audio: {audio_files}\n'
+              f'Documents: {documents_files}\n'
+              f'Archives: {archives_files}\n'
+              f'Known extensions: {known_types}\n'
+              f'Unknown extensions: {unknown_types}')
+
+    else:
+        print("It isn't a folder")
+
+if __name__ == '__main__':
     main()
