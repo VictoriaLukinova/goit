@@ -9,5 +9,5 @@ setup(
     author_email= 'ViktoriagLuka@gmail.com',
     license= '',
     packages= find_namespace_packages(),
-    entry_points ={'console_scripts': ['clean-folder=clean_folder.clean']},
+    entry_points ={'console_scripts': ['clean-folder=clean_folder.clean:main']},
 )
